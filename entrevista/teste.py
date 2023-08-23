@@ -50,4 +50,12 @@ print(renda)
 print(gastos)
 print(total)
 
+print('Pontuação final: ')
+for i in total:
+    if int(i) <= 30:
+        pf = 6
+        print(pf)
+    else:
+        pf = 2
+        print(pf)
 
