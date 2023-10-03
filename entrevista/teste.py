@@ -1,61 +1,45 @@
-#import library
-import gspread
+import pandas as pd
 
-#connect to the service account
-gc = gspread.service_account(filename="chave.json")
+df = pd.read_excel('Entrevista Socioeconômica - TSI 2023 (respostas).xlsx')
 
-#connect to your sheet (between "" = the name of your G Sheet, keep it short)
-sh = gc.open("Teste").sheet1
+fam = pd.Series(df['Quantas pessoas moram com o candidato? (INCLUINDO O CANDIDATO)'])
 
-#get the values from cells a2 and b2
-r1 = sh.acell("b2").value
-r2 = sh.acell("b3").value
+print(fam)
 
-print(r1)
-print(r2)
+tiporenda = pd.Series(df["Tipo de comprovação de renda do candidato apresentada:"])
 
-row = 2
-renda = []
-limit = 7
+print(tiporenda)
 
-while row <= limit:
+listtiporenda = tiporenda.tolist()
 
- renda.append(int(sh.acell(f"b{row}").value))
- for i in renda:
-     if int(i) <= 30:
-         prenda = 4
-        
- row += 1
- 
-row = 2
-gastos = []
-limit = 7
+confrenda = []
 
-while row <= limit:
+print(listtiporenda)
 
- gastos.append(int(sh.acell(f"c{row}").value))
- for i in gastos:
-     if int(i) <= 30:
-         p = 4
-         
- row += 1
- 
- total = []
+i = 0
 
-for r in range(len(renda)):
-    total.append(renda[r] - gastos[r])
+while i < len(listtiporenda):
     
-
-print(renda)
-print(gastos)
-print(total)
-
-print('Pontuação final: ')
-for i in total:
-    if int(i) <= 30:
-        pf = 6
-        print(pf)
-    else:
-        pf = 2
-        print(pf)
-
+    for i in range(len(listtiporenda)):
+        if i == 'Não declarou renda' :
+            confrenda = 2
+        elif i == 'Apresenta um holerite (desde que o documento não tenha mais do que 6 meses)': 
+            confrenda = 2
+        elif i == 'Declaração de próprio punho explicando alguma fonte sem formalização jurídica ou que não é possível apresentar comprovante (ex: uma pensão alimentícia, trabalhador autônomo)': 
+            confrenda = 2
+        elif i == 'Documento de aposentadoria': 
+            confrenda = 2
+        elif i == 'Carteira de trabalho: página com o emprego e salário mais recente, incluindo também a página de identificação (formato digital ou físico)': 
+            confrenda = 2
+        elif i == 'Documentos do governo comprovando o valor de algum auxílio': 
+            confrenda = 2
+        elif i == 'Não apresentou um documento comprobatório': 
+            confrenda = 0
+        elif i == 'Extratos ou prints da conta do banco (ex: um print alegando que entraram R$1500 na conta)': 
+            confrenda = 0
+        elif i == 'Apresentou um holerite com mais de 6 meses.': 
+            confrenda = 0
+    
+        
+        
+print(confrenda)
