@@ -86,6 +86,8 @@ for i in df_aj['rendat']:
 
 df_aj['pont_rendat'] = pont_rendat
 
+print([df_aj['pont_rendat']])
+
 #pontuação renda per capita
 df_aj['rendapc'] = df_aj['rendat'] / df_aj['fam_conf']
 
