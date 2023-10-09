@@ -1,0 +1,8 @@
+import datetime as dt
+
+data = dt.date.today()
+
+atual_iptu = "Comprovante de IPTU de " + str(data.year) + ', ' + str(data.year - 1) + ' ou ' + str(data.year - 2)
+
+print(atual_iptu)
+

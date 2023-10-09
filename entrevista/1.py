@@ -1,8 +1,9 @@
 #ANTES DE RODAR: conferir se os nomes das colunas condizem com as colunas da planilha, conferir a viabilidade dos dados, conferir autodeclaração e outras observações
 
-#importando o pandas
+#importando o pandas e o datetime
 import pandas as pd
 pd.options.mode.chained_assignment = None
+import datetime as dt
 
 #importando a planilha (ela deve estar na mesma pasta que o arquivo do código)
 #x = input('Nome do arquivo da planilha, com extensão: ')
@@ -16,7 +17,7 @@ data_cols = ['Número de Identificação', 'Número do Pedido', 'Nome COMPLETO',
 
 df_aj = df[data_cols]
 
-new_cols = ['Número de Identificação', 'Número do Pedido', 'Nome', 'decl_racial', 'fam', 'fam_comp', 'fam_inc',  'renda_c', 'renda_c_conf', 'renda_p', 'renda_p_conf', 'renda_m', 'renda_m_conf', 'renda_if', 'renda_if_conf', 'renda_conj', 'renda_conj_conf', 'renda_out', 'renda_out_conf', 'renda_ext', 'renda_ext_conf', 'imoveis', 'tipo_casa', 'aluguel', 'alugel_conf', 'iptu', 'iptu_conf', 'agua', 'agua_conf', 'luz', 'luz_conf', 'telefone', 'telefone_conf',  'internet', 'internet_conf', 'transp', 'edu', 'edu_conf', 'saude', 'saude_conf', 'outros_gastos', 'outros_gastos_conf', 'carros', 'motos', 'ipva', 'ipva_conf', 'ir_pagar', 'ir_pagar_conf', 'ir_rest', 'ir_rest_conf', 'dividas', 'dividas_conf', 'tipo_EM', 'ano_EM', 'bolsa_EM', 'EM_conf', 'escolaridade_p', 'escolaridade_m']
+new_cols = ['Número de Identificação', 'Número do Pedido', 'Nome', 'decl_racial', 'fam', 'fam_comp', 'fam_inc',  'renda_c', 'renda_c_conf', 'renda_p', 'renda_p_conf', 'renda_m', 'renda_m_conf', 'renda_if', 'renda_if_conf', 'renda_conj', 'renda_conj_conf', 'renda_out', 'renda_out_conf', 'renda_ext', 'renda_ext_conf', 'imoveis', 'tipo_casa', 'aluguel', 'aluguel_conf', 'iptu', 'iptu_conf', 'agua', 'agua_conf', 'luz', 'luz_conf', 'telefone', 'telefone_conf',  'internet', 'internet_conf', 'transp', 'edu', 'edu_conf', 'saude', 'saude_conf', 'outros_gastos', 'outros_gastos_conf', 'carros', 'motos', 'ipva', 'ipva_conf', 'ir_pagar', 'ir_pagar_conf', 'ir_rest', 'ir_rest_conf', 'dividas', 'dividas_conf', 'tipo_EM', 'ano_EM', 'bolsa_EM', 'EM_conf', 'escolaridade_p', 'escolaridade_m']
 
 cols = {data_cols[i]: new_cols[i] for i in range(len(data_cols))}
 #esse dicionário iguala o nome das colunas do forms com os novos nomes, portanto o index da coluna na lista data_cols deve ser o mesmo na lista new_cols
@@ -86,8 +87,6 @@ for i in df_aj['rendat']:
 
 df_aj['pont_rendat'] = pont_rendat
 
-print([df_aj['pont_rendat']])
-
 #pontuação renda per capita
 df_aj['rendapc'] = df_aj['rendat'] / df_aj['fam_conf']
 
@@ -114,4 +113,55 @@ for i in df_aj['rendapc']:
 
 df_aj['pont_rendapc'] = pont_rendapc
 
-print([df_aj['pont_rendapc']])
+#confiabilidade gastos
+#aluguel
+def aluguel_conf(tipo):
+    df_aj.loc[df_aj[tipo]=="Casa própria", tipo] = 2
+    df_aj.loc[df_aj[tipo]=="Casa própria e comprovou pagar condomínio", tipo] = 2
+    df_aj.loc[df_aj[tipo]=="Apresenta um contrato de aluguel (desde que o documento esteja no prazo de vigor)", tipo] = 2
+    df_aj.loc[df_aj[tipo]=="Declaração de próprio punho, desde que alegue o valor e o motivo de não ter recibo", tipo] = 2
+    df_aj.loc[df_aj[tipo]=="Se a pessoa declara que vive em situação irregular ou em casa emprestada", tipo] = 2
+    df_aj.loc[df_aj[tipo]=="Carteira de trabalho não encerrada", tipo] = 2
+    df_aj.loc[df_aj[tipo]=="Recibo de aluguel sem data nem nome (somente com o valor)", tipo] = 1
+    df_aj.loc[df_aj[tipo]=="Casa alugada mas não apresentou documento comprobatório", tipo] = 0
+    df_aj.loc[df_aj[tipo]=="Print ou nota fiscal de transferência de banco", tipo] = 0
+    df_aj.loc[df_aj[tipo]=="Paga condomínio em casa própria mas não apresentou documento comprobatório", tipo] = 0
+
+aluguel_conf('aluguel_conf')
+
+df_aj['res_aluguel'] = df_aj['aluguel'] * df_aj['aluguel_conf']
+
+#iptu
+data = dt.date.today()
+
+atual_iptu = "Comprovante de IPTU de " + str(data.year - 2) + ',  ' + str(data.year - 1) + ' ou ' + str(data.year)
+
+antigo_iptu = "Documentos de " + str(data.year - 3) + " ou mais antigos"
+
+def iptu_conf(tipo):
+    df_aj.loc[df_aj[tipo]=="Declaração de isenção à próprio punho ou um documento que mostre que ela é isenta", tipo] = 2
+    df_aj.loc[df_aj[tipo]==atual_iptu, tipo] = 2
+    df_aj.loc[df_aj[tipo]=="Casa em situação irregular ou emprestada e disse que não paga IPTU", tipo] = 2
+    df_aj.loc[df_aj[tipo]=="Declaração de próprio punho, desde que alegue o valor e o motivo de não ter recibo", tipo] = 2
+    df_aj.loc[df_aj[tipo]=="Quando a pessoa mora em casa própria, coloca que não paga IPTU, mas não declara isenção", tipo] = 1
+    df_aj.loc[df_aj[tipo]=="Declarou valor mas não comprovou", tipo] = 0
+    df_aj.loc[df_aj[tipo]==antigo_iptu, tipo] = 0
+    df_aj.loc[df_aj[tipo]=="Valor declarado 0", tipo] = 0
+
+iptu_conf('iptu_conf')
+
+
+
+#água
+def agua_conf(tipo):
+    df_aj.loc[df_aj[tipo]=="Declarou valor 0 e a casa está em situação irregular ou se o indivíduo morar de favor.", tipo] = 2
+    df_aj.loc[df_aj[tipo]=="Existe alguma explicação ou declaração do porquê não paga água tais como ( tirar água do poço, etc)", tipo] = 2
+    df_aj.loc[df_aj[tipo]=="Declarou um valor e ele é comprovado através de um documento recente", tipo] = 2
+    df_aj.loc[df_aj[tipo]=="Documento incompleto, pouco visível, onde não há como ver o valor final ou o nome de quem vem na conta.(Leve no bom senso)", tipo] = 1
+    df_aj.loc[df_aj[tipo]=="Valor declarado 0 e não comprovou o porquê de não pagar.", tipo] = 1
+    df_aj.loc[df_aj[tipo]=="Declarou um valor mas não comprovou", tipo] = 0
+    df_aj.loc[df_aj[tipo]=="Não é um documento recente (mais de 6 meses)", tipo] = 0
+    df_aj.loc[df_aj[tipo]=="Documento ilegível", tipo] = 0
+
+agua_conf('agua_conf')
+
