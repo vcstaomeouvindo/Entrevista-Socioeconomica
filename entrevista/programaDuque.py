@@ -150,8 +150,6 @@ def iptu_conf(tipo):
 
 iptu_conf('iptu_conf')
 
-
-
 #água
 def agua_conf(tipo):
     df_aj.loc[df_aj[tipo]=="Declarou valor 0 e a casa está em situação irregular ou se o indivíduo morar de favor.", tipo] = 2
@@ -164,4 +162,3 @@ def agua_conf(tipo):
     df_aj.loc[df_aj[tipo]=="Documento ilegível", tipo] = 0
 
 agua_conf('agua_conf')
-
