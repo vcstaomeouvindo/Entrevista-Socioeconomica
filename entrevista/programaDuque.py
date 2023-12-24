@@ -5,6 +5,13 @@ import pandas as pd
 pd.options.mode.chained_assignment = None
 import datetime as dt
 
+#é importante já termos definidos os intervalos e a pontuação correspondente a cada faixa, SEMPRE REVISAR
+#lembrar que os índices devem ser os mesmos
+intervalos_renda_total = [(0, 1099), (1100, 1463), (1464, 1799), (1800, 2180), (2181, 2598), (2599, 3099), (3100, 3795), (3796, 4983), (4984, 10000000000000)]
+pontos_renda_total = [20, 18, 15, 12, 9, 6, 3, 1, 0]
+intervalos_renda_pc = [(0, 359), (360, 499), (500, 637), (638, 757), (758, 916), (917, 1111), (1112, 1401), (1402, 1952), (1953, 10000000000000)]
+pontos_renda_pc = [30, 26, 22, 18, 14, 10, 6, 2, 0]
+
 #importando a planilha (ela deve estar na mesma pasta que o arquivo do código)
 #x = input('Nome do arquivo da planilha, com extensão: ')
 x = 'Entrevista Socioeconômica - TSI 2023 (respostas).xlsx'
@@ -31,6 +38,8 @@ df_aj['fam_inc'] = df_aj['fam_inc'].fillna(0)
 
 df_aj['fam_conf'] = df_aj['fam_comp'] * 2 + df_aj['fam_inc']
 
+df_aj['fam'] = df_aj['fam_conf'] / 2
+
 #rendas
 def renda_conf(tipo):
     df_aj.loc[df_aj[tipo]=="Não declarou renda", tipo] = 2
@@ -51,67 +60,60 @@ renda_conf('renda_conj_conf')
 renda_conf('renda_out_conf')
 renda_conf('renda_ext_conf')
 
-def res_renda(tipo, tipo_conf, nomecol):
-    df_aj[nomecol] = df_aj[tipo] * df_aj[tipo_conf]
+def conf(col1, col2):
+    df_aj[col1] = df_aj[col1].astype(float)
+    df_aj[col2] = df_aj[col2].astype(float)
+    cont = df_aj[col1] * (df_aj[col2]/2)
+    return cont
 
-res_renda('renda_c', 'renda_c_conf', 'res_renda_c')
-res_renda('renda_p', 'renda_p_conf', 'res_renda_p')
-res_renda('renda_m', 'renda_m_conf', 'res_renda_m')
-res_renda('renda_if', 'renda_if_conf', 'res_renda_if')
-res_renda('renda_conj', 'renda_conj_conf', 'res_renda_conj')
-res_renda('renda_out', 'renda_out_conf', 'res_renda_out')
-res_renda('renda_ext', 'renda_ext_conf', 'res_renda_ext')
+df_aj['rd1_t'] = conf('renda_c', 'renda_c_conf')
+df_aj['rd2_t'] = conf('renda_p', 'renda_p_conf')
+df_aj['rd3_t'] = conf('renda_m', 'renda_m_conf')
+df_aj['rd4_t'] = conf('renda_if', 'renda_if_conf')
+df_aj['rd5_t'] = conf('renda_conj', 'renda_conj_conf')
+df_aj['rd6_t'] = conf('renda_out', 'renda_out_conf')
+df_aj['rd7_t'] = conf('renda_ext', 'renda_ext_conf')
 
 #renda total
-df_aj['rendat'] = df_aj[['res_renda_c', 'res_renda_p','res_renda_m','res_renda_if','res_renda_conj','res_renda_out','res_renda_ext']].sum(axis = 1)
+df_aj['renda_total'] = df_aj[['rd1_t', 'rd2_t','rd3_t','rd4_t','rd5_t','rd6_t','rd7_t']].sum(axis = 1)
 
 #pontuação renda total
-pont_rendat = []
-for i in df_aj['rendat']:
-    if (i >= 0) and (i < 882):
-        pont_rendat.append(20)
-    elif (i >= 882) and (i < 1242):
-        pont_rendat.append(18)
-    elif (i >= 1242) and (i < 1350):
-        pont_rendat.append(15)
-    elif (i >= 1350) and (i < 1600):
-        pont_rendat.append(12)
-    elif (i >= 1600) and (i < 2520):
-        pont_rendat.append(9)
-    elif (i >= 2520) and (i < 4800):
-        pont_rendat.append(6)
-    elif (i >= 4800) and (i < 5500):
-        pont_rendat.append(3)
-    elif (i >= 5500):
-        pont_rendat.append(0)
 
-df_aj['pont_rendat'] = pont_rendat
+#vamos definir a função de pontuação
+def pontuacao(df, coluna, intervalos, pontos):
+    #validar se as listas tem o mesmo tamanho (para cada intervalo, uma pontuação)
+    if len(intervalos) != len(pontos):
+        raise ValueError("Número de intervalos não é o mesmo do número de possíveis pontos!")
+
+    #lista vazia para conter os pontos (depois transformaremos em coluna na df)
+    pontos_atribuidos = []
+
+    #passa por cada linha
+    for value in df[coluna]:
+        #confere em qual intervalo cada célula se encaixa e atribui uma pontuação
+        score = None
+        for i, interval in enumerate(intervalos):
+            if interval[0] <= value <= interval[1]:
+                score = pontos[i]
+                break
+
+        #adiciona o score na lista
+        pontos_atribuidos.append(score)
+
+    #lista vira coluna
+    df[f'''pont_{coluna}'''] = pontos_atribuidos
+
+    return df
+
+#aplicar a função na df
+df_aj = pontuacao(df_aj, 'renda_total', intervalos_renda_total, pontos_renda_total)
 
 #pontuação renda per capita
-df_aj['rendapc'] = df_aj['rendat'] / df_aj['fam_conf']
+df_aj['renda_pc'] = df_aj['renda_total'] / df_aj['fam']
 
-df_aj['rendapc'] = df_aj['rendapc'].fillna(0)
+df_aj['renda_pc'] = df_aj['renda_pc'].fillna(0)
 
-pont_rendapc = []
-for i in df_aj['rendapc']:
-    if (i >= 0) and (i < 245):
-        pont_rendapc.append(30)
-    elif (i >= 245) and (i < 345):
-        pont_rendapc.append(26)
-    elif (i >= 345) and (i < 450):
-        pont_rendapc.append(22)
-    elif (i >= 450) and (i < 580):
-        pont_rendapc.append(18)
-    elif (i >= 580) and (i < 700):
-        pont_rendapc.append(14)
-    elif (i >= 700) and (i < 900):
-        pont_rendapc.append(10)
-    elif (i >= 900) and (i < 1345):
-        pont_rendapc.append(6)
-    elif (i >= 1345):
-        pont_rendapc.append(2)
-
-df_aj['pont_rendapc'] = pont_rendapc
+df_aj = pontuacao(df_aj, 'renda_pc', intervalos_renda_pc, pontos_renda_pc)
 
 #confiabilidade gastos
 #aluguel
