@@ -164,3 +164,38 @@ def agua_conf(tipo):
     df_aj.loc[df_aj[tipo]=="Documento ilegível", tipo] = 0
 
 agua_conf('agua_conf')
+
+#Educação
+def edu_conf(tipo):
+    df_aj.loc[df_aj[tipo]=='Valor declarado 0', tipo] = 2
+    df_aj.loc[df_aj[tipo]=='Um boleto ou comprovante de pagamento qualquer instituição de educação', tipo] = 2
+    df_aj.loc[df_aj[tipo]=='Um print ou recibo de pagamento, mas que não diz quem estava recebendo.', tipo] = 1
+    df_aj.loc[df_aj[tipo]=='Declarou valor mas não apresentou comprovante.', tipo] = 0
+
+edu_conf('edu_conf')    
+
+df_aj['res_edu'] = df_aj['edu'] * df_aj['edu_conf'] / 2
+
+#Saúde
+def saude_conf(tipo):
+    df_aj.loc[df_aj[tipo]=="Valor declarado 0", tipo] = 2
+    df_aj.loc[df_aj[tipo]=="Documento, boleto, transferência bancária que indique que quem recebe o valor é um plano de saúde", tipo] = 2
+    df_aj.loc[df_aj[tipo]=="Valor comprovado no holerite", tipo] = 2
+    df_aj.loc[df_aj[tipo]=="Declarou valor mas não apresentou um documento comprobatório", tipo] = 0
+    df_aj.loc[df_aj[tipo]=="Consultas avulsas (não é algo recorrente)", tipo] = 0
+
+saude_conf('saude_conf')
+
+df_aj['res_saude'] = df_aj['saude'] * df_aj['saude_conf'] / 2
+
+#Outros
+def outros_gastos_conf(tipo):
+    df_aj.loc[df_aj[tipo]=="Valor declarado 0", tipo] = 2
+    df_aj.loc[df_aj[tipo]=="Valor comprovado", tipo] = 2
+    df_aj.loc[df_aj[tipo]=="Valor inferior a 300", tipo] = 2
+    df_aj.loc[df_aj[tipo]=="Valor superior a 300 e comprovado", tipo] = 2
+    df_aj.loc[df_aj[tipo]=="Gasto não recorrente", tipo] = 0
+
+outros_gastos_conf('outros_gastos_conf')
+
+df_aj['res_outros_gastos'] = df_aj['outros_gastos'] * df_aj['outros_gastos_conf'] / 2
