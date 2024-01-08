@@ -152,6 +152,21 @@ def iptu_conf(tipo):
 
 iptu_conf('iptu_conf')
 
+#ipva
+
+def ipva_conf(tipo):
+
+#luz
+
+def luz_conf(tipo):
+
+#IR-pagar
+
+def ir_pagar_conf(tipo):
+    
+#IR-restituir
+
+def ir_rest_conf(tipo):
 #água
 def agua_conf(tipo):
     df_aj.loc[df_aj[tipo]=="Declarou valor 0 e a casa está em situação irregular ou se o indivíduo morar de favor.", tipo] = 2
