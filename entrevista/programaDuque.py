@@ -183,10 +183,27 @@ luz_conf('luz_conf')
 #IR-pagar
 
 def ir_pagar_conf(tipo):
+    df_aj.loc[df_aj[tipo]=="Valor declarado 0", tipo] = 2
+    df_aj.loc[df_aj[tipo]=="Apresentou documento comprobatório", tipo] = 2
+    df_aj.loc[df_aj[tipo]=="Declarou valor mas não comprovou", tipo] = 0
+    df_aj.loc[df_aj[tipo]=="Declarou um valor, mas documento incompleto e que não mostra a página com o “a pagar”", tipo] = 0
+    df_aj.loc[df_aj[tipo]=="Declarou um valor, mas documento incompleto e que não mostra a página com o “a restituir”", tipo] = 0
+    df_aj.loc[df_aj[tipo]=="Renda mensal declarada de um dos familiares é maior do que R$1.904 e não trouxe declaração de renda", tipo] = 2
+
+ir_pagar_conf('ir_pagar_conf')
+    
     
 #IR-restituir
 
 def ir_rest_conf(tipo):
+    df_aj.loc[df_aj[tipo]=="Valor declarado 0", tipo] = 2
+    df_aj.loc[df_aj[tipo]=="Apresentou documento comprobatório", tipo] = 2
+    df_aj.loc[df_aj[tipo]=="Declarou valor mas não comprovou", tipo] = 0
+    df_aj.loc[df_aj[tipo]=="Declarou um valor, mas documento incompleto e que não mostra a página com o “a pagar”", tipo] = 0
+    df_aj.loc[df_aj[tipo]=="Declarou um valor, mas documento incompleto e que não mostra a página com o “a restituir”", tipo] = 0
+    df_aj.loc[df_aj[tipo]=="Renda mensal declarada de um dos familiares é maior do que R$1.904 e não trouxe declaração de renda", tipo] = 2
+
+ir_rest_conf('ir_rest_conf')
 #água
 def agua_conf(tipo):
     df_aj.loc[df_aj[tipo]=="Declarou valor 0 e a casa está em situação irregular ou se o indivíduo morar de favor.", tipo] = 2
