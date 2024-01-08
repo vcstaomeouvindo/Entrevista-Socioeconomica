@@ -154,11 +154,31 @@ iptu_conf('iptu_conf')
 
 #ipva
 
+antigo_ipva = "Documentos de " + str(data.year - 3) + " ou mais antigos"
+
 def ipva_conf(tipo):
+    df_aj.loc[df_aj[tipo]=="Valor declarado 0", tipo] = 2
+    df_aj.loc[df_aj[tipo]=="Apresentou documento comprobatório", tipo] = 2
+    df_aj.loc[df_aj[tipo]=="Quando o valor for 0, a pessoa tiver veículos e declarar a isenção", tipo] = 2
+    df_aj.loc[df_aj[tipo]=="Arquivo indicando uma transação (pagamento) de IPVA", tipo] = 2
+    df_aj.loc[df_aj[tipo]=="IPVA isento", tipo] = 2
+    df_aj.loc[df_aj[tipo]==antigo_ipva, tipo] = 0
+    df_aj.loc[df_aj[tipo]=="Declarou valor mas não apresentou documento comprobatório", tipo] = 0
+
+ipva_conf('ipva_conf')
 
 #luz
 
 def luz_conf(tipo):
+    df_aj.loc[df_aj[tipo]=="Valor declarado 0 e a casa está em situação irregular, existe alguma declaração explicando o porquê não paga luz tais como (ex: “gato”)", tipo] = 2
+    df_aj.loc[df_aj[tipo]=="Declarou um valor e ele é comprovado através de um documento recente", tipo] = 2
+    df_aj.loc[df_aj[tipo]=="Documento incompleto, pouco visível, onde não há como ver o valor final ou o nome de quem vem na conta.", tipo] = 1
+    df_aj.loc[df_aj[tipo]=="Valor declarado 0 e não comprovou o por que não paga.", tipo] = 1
+    df_aj.loc[df_aj[tipo]=="Quando declara um valor mas não comprova", tipo] = 0
+    df_aj.loc[df_aj[tipo]=="Não é um documento recente (menos de 6 meses)", tipo] = 0
+    df_aj.loc[df_aj[tipo]=="Documento ilegível", tipo] = 0
+    
+luz_conf('luz_conf')
 
 #IR-pagar
 
