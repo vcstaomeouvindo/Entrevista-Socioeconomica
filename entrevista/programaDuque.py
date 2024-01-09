@@ -226,7 +226,7 @@ def edu_conf(tipo):
 
 edu_conf('edu_conf')    
 
-df_aj['res_edu'] = df_aj['edu'] * df_aj['edu_conf'] / 2
+
 
 #Saúde
 def saude_conf(tipo):
@@ -238,7 +238,7 @@ def saude_conf(tipo):
 
 saude_conf('saude_conf')
 
-df_aj['res_saude'] = df_aj['saude'] * df_aj['saude_conf'] / 2
+
 
 #Outros
 def outros_gastos_conf(tipo):
@@ -247,7 +247,8 @@ def outros_gastos_conf(tipo):
     df_aj.loc[df_aj[tipo]=="Valor inferior a 300", tipo] = 2
     df_aj.loc[df_aj[tipo]=="Valor superior a 300 e comprovado", tipo] = 2
     df_aj.loc[df_aj[tipo]=="Gasto não recorrente", tipo] = 0
+    df_aj.loc[df_aj[tipo]=="Não comprovou o valor", tipo] = 0
 
 outros_gastos_conf('outros_gastos_conf')
 
-df_aj['res_outros_gastos'] = df_aj['outros_gastos'] * df_aj['outros_gastos_conf'] / 2
+
